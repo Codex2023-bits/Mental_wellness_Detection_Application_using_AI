@@ -1,0 +1,38 @@
+
+.background_image{
+    background-image: url('https://i.ibb.co/d0K6Sg3L/dc5dbb1c-4d4f-4795-a916-5414c4061d43.png');
+    height: 100vh;
+    background-size: cover;
+}
+
+.input_box{
+    gap: 10px;
+
+    align-items: center;
+}
+
+.icon{
+    font-size: 18px;
+    color: #333;
+}
+
+.logo{
+    height: 350px;
+    width: auto;
+}
+
+.text_box{
+    width: 250px;
+}
+
+    .glass_box{
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    height: fit-content;
+    border-radius: 20px;
+    padding: 40px;
+        margin-top: 60px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
