@@ -1,38 +1,220 @@
+/* Mental Wellness App - Calming Design System */
 
-.background_image{
-    background-image: url('https://i.ibb.co/d0K6Sg3L/dc5dbb1c-4d4f-4795-a916-5414c4061d43.png');
-    height: 100vh;
+/* Import calming, modern font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Root variables for consistent theming */
+:root {
+    --primary-lavender: #9b87f5;
+    --primary-mint: #7dd3c0;
+    --warm-beige: #f5f1e8;
+    --soft-gray: #6b7280;
+    --dark-text: #374151;
+    --success-green: #6ee7b7;
+    --shadow-soft: rgba(155, 135, 245, 0.15);
+}
+
+/* Global reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--dark-text);
+    line-height: 1.6;
+}
+
+/* Background with calming gradient overlay */
+.background_image {
+    background-image:
+        linear-gradient(135deg, rgba(155, 135, 245, 0.1) 0%, rgba(125, 211, 192, 0.1) 100%),
+        url('https://i.ibb.co/d0K6Sg3L/dc5dbb1c-4d4f-4795-a916-5414c4061d43.png');
+    min-height: 100vh;
     background-size: cover;
-}
-
-.input_box{
-    gap: 10px;
-
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
     align-items: center;
+    padding: 20px;
 }
 
-.icon{
+/* Enhanced glassmorphism card */
+.glass_box {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 48px 40px;
+    margin-top: 0;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 8px 32px var(--shadow-soft),
+        0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    max-width: 420px;
+    width: 100%;
+}
+
+.glass_box:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 40px var(--shadow-soft),
+        0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Welcoming headings */
+h1 {
+    font-weight: 600;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--primary-lavender), var(--primary-mint));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    color: var(--soft-gray);
+    font-size: 0.95rem;
+    font-weight: 300;
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+/* Input container */
+.input_box {
+    gap: 12px;
+    align-items: center;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Icon styling */
+.icon {
     font-size: 18px;
-    color: #333;
+    color: var(--primary-lavender);
+    transition: color 0.3s ease;
+    min-width: 20px;
 }
 
-.logo{
+/* Input fields with enhanced focus states */
+.text_box {
+    width: 100%;
+    max-width: 300px;
+    padding: 14px 18px;
+    border: 2px solid rgba(155, 135, 245, 0.2);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.text_box:focus {
+    outline: none;
+    border-color: var(--primary-lavender);
+    box-shadow: 0 0 0 4px rgba(155, 135, 245, 0.1);
+    background: white;
+}
+
+.text_box::placeholder {
+    color: #9ca3af;
+    font-weight: 300;
+}
+
+/* Enhanced button styling */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-lavender), var(--primary-mint));
+    border: none;
+    padding: 14px 48px;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px var(--shadow-soft);
+    letter-spacing: 0.3px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow-soft);
+    background: linear-gradient(135deg, #8b77e5, #6dc3b0);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:focus {
+    outline: none;
+    box-shadow:
+        0 6px 20px var(--shadow-soft),
+        0 0 0 4px rgba(155, 135, 245, 0.2);
+}
+
+/* Logo styling */
+.logo {
     height: 350px;
     width: auto;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
+    transition: transform 0.3s ease;
 }
 
-.text_box{
-    width: 250px;
+.logo:hover {
+    transform: scale(1.02);
 }
 
-    .glass_box{
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    height: fit-content;
-    border-radius: 20px;
-    padding: 40px;
-        margin-top: 60px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+/* Welcome page specific styles */
+.welcome-message {
+    font-size: 1.1rem;
+    color: var(--soft-gray);
+    font-weight: 300;
+    margin-top: 16px;
+    line-height: 1.8;
+}
+
+.user-email {
+    color: var(--primary-lavender);
+    font-weight: 500;
+}
+
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .glass_box {
+        padding: 36px 28px;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    .logo {
+        height: 250px;
+    }
+
+    .text_box {
+        max-width: 100%;
+    }
+}
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid var(--primary-lavender);
+    outline-offset: 2px;
 }
