@@ -1,9 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <% // Step 9: Retrieve the stored username using session.getAttribute() on subsequent pages // Step 14: Prevent
-        access to session data after logout by checking session validity String email=(String)
-        session.getAttribute("user"); String loginTime=(String) session.getAttribute("loginTime"); // Check if session
-        is valid - if not, redirect to login if (email==null || email.isEmpty()) {
-        response.sendRedirect("index.jsp?error=session"); return; } %>
+<%
+String email = (String) session.getAttribute("user");
+String loginTime = (String) session.getAttribute("loginTime");
+
+%>
         <!DOCTYPE html>
         <html lang="en">
 
