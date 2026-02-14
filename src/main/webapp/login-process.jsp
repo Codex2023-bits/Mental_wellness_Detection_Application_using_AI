@@ -1,20 +1,9 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%
-    // Step 5: Retrieve the username (email) from the request object using POST method
-    String email = request.getParameter("email");
-    String password = request.getParameter("password");
-    
-    // Basic validation
-    if (email != null && !email.isEmpty() && password != null && !password.isEmpty()) {
-        // Step 6: Create a user session using the JSP session object (implicit object)
-        // Step 7: Store the username in the session using session.setAttribute()
-        session.setAttribute("user", email);
-        session.setAttribute("loginTime", new java.util.Date().toString());
-        
-        // Step 8: Redirect the user to another JSP page after successful login
-        response.sendRedirect("welcome.jsp");
-    } else {
-        // If validation fails, redirect back to login with error
-        response.sendRedirect("index.jsp?error=invalid");
-    }
-%>
+﻿<%@ page import="java.time.LocalDateTime" %>
+    <%@ page import="java.time.format.DateTimeFormatter" %>
+        <% String email=request.getParameter("email"); String pass=request.getParameter("password"); // Hardcoded
+            credentials for the demo // Email: babishake8@gmail.com // Password: password if
+            ("babishake8@gmail.com".equals(email) && "password" .equals(pass)) { // Login Success: Create Session
+            session.setAttribute("user", email); // Store login time for the profile page DateTimeFormatter
+            dtf=DateTimeFormatter.ofPattern("HH:mm:ss"); session.setAttribute("loginTime",
+            LocalDateTime.now().format(dtf)); // Redirect to Welcome Page response.sendRedirect("welcome.jsp"); } else {
+            // Login Failed: Redirect back with error parameter response.sendRedirect("index.jsp?error=invalid"); } %>

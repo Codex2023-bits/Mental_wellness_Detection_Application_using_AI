@@ -17,3 +17,558 @@ demo/
             ├── welcome.jsp                  <-- Landing Page (Fixed)
             ├── dashboard.jsp                <-- Dashboard (Fixed)
             └── profile.jsp                  <-- Profile (Fixed)
+
+================================================================================
+BOILERPLATE CODE FOR EACH FILE
+================================================================================
+
+1. pom.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>org.example</groupId>
+    <artifactId>demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+    
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.cargo</groupId>
+                <artifactId>cargo-maven3-plugin</artifactId>
+                <version>1.10.10</version>
+                <configuration>
+                    <container>
+                        <containerId>tomcat10x</containerId>
+                        <type>embedded</type>
+                    </container>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+2. LoginServlet.java
+--------------------------------------------------------------------------------
+package org.example;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        
+        // Simple validation (replace with database validation in production)
+        if (username != null && password != null && 
+            username.equals("admin") && password.equals("password")) {
+            
+            // Create session
+            HttpSession session = request.getSession();
+            session.setAttribute("username", username);
+            
+            // Redirect to dashboard
+            response.sendRedirect("dashboard.jsp");
+        } else {
+            // Login failed
+            request.setAttribute("error", "Invalid username or password");
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+        }
+    }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        response.sendRedirect("index.jsp");
+    }
+}
+
+3. LogoutServlet.java
+--------------------------------------------------------------------------------
+package org.example;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+
+@WebServlet("/logout")
+public class LogoutServlet extends HttpServlet {
+    
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        // Invalidate session
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        
+        // Redirect to login page
+        response.sendRedirect("index.jsp");
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
+}
+
+4. index.jsp (Login Page)
+--------------------------------------------------------------------------------
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Demo App</title>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>Welcome</h1>
+            <p>Please login to continue</p>
+            
+            <% if (request.getAttribute("error") != null) { %>
+                <div class="error-message">
+                    <%= request.getAttribute("error") %>
+                </div>
+            <% } %>
+            
+            <form action="login" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+5. dashboard.jsp
+--------------------------------------------------------------------------------
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    // Check if user is logged in
+    if (session.getAttribute("username") == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+    String username = (String) session.getAttribute("username");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Demo App</title>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-brand">Demo App</div>
+        <div class="nav-links">
+            <a href="dashboard.jsp" class="active">Dashboard</a>
+            <a href="profile.jsp">Profile</a>
+            <a href="logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="welcome-header">
+            <h1>Welcome, <%= username %>!</h1>
+            <p>This is your dashboard</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>Total Users</h3>
+                <p class="stat">1,234</p>
+            </div>
+            
+            <div class="card">
+                <h3>Active Sessions</h3>
+                <p class="stat">42</p>
+            </div>
+            
+            <div class="card">
+                <h3>Projects</h3>
+                <p class="stat">18</p>
+            </div>
+            
+            <div class="card">
+                <h3>Tasks</h3>
+                <p class="stat">96</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+6. profile.jsp
+--------------------------------------------------------------------------------
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    // Check if user is logged in
+    if (session.getAttribute("username") == null) {
+        response.sendRedirect("index.jsp");
+        return;
+    }
+    String username = (String) session.getAttribute("username");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Demo App</title>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-brand">Demo App</div>
+        <div class="nav-links">
+            <a href="dashboard.jsp">Dashboard</a>
+            <a href="profile.jsp" class="active">Profile</a>
+            <a href="logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="profile-header">
+            <div class="avatar">
+                <%= username.substring(0, 1).toUpperCase() %>
+            </div>
+            <h1><%= username %></h1>
+        </div>
+        
+        <div class="profile-details">
+            <div class="card">
+                <h2>Profile Information</h2>
+                <div class="info-group">
+                    <label>Username:</label>
+                    <span><%= username %></span>
+                </div>
+                <div class="info-group">
+                    <label>Email:</label>
+                    <span><%= username %>@example.com</span>
+                </div>
+                <div class="info-group">
+                    <label>Role:</label>
+                    <span>Administrator</span>
+                </div>
+                <div class="info-group">
+                    <label>Member Since:</label>
+                    <span>February 2026</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+7. welcome.jsp
+--------------------------------------------------------------------------------
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - Demo App</title>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+<body>
+    <div class="welcome-page">
+        <div class="welcome-content">
+            <h1>Welcome to Demo App</h1>
+            <p>Your modern web application solution</p>
+            <a href="index.jsp" class="btn-primary">Get Started</a>
+        </div>
+    </div>
+</body>
+</html>
+
+8. sample.css
+--------------------------------------------------------------------------------
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-box h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.login-box p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.btn-login, .btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-login:hover, .btn-primary:hover {
+    opacity: 0.9;
+}
+
+.error-message {
+    background: #fee;
+    color: #c33;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border-left: 4px solid #c33;
+}
+
+.navbar {
+    background: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-brand {
+    font-size: 20px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.nav-links a {
+    margin-left: 20px;
+    color: #333;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.nav-links a.active, .nav-links a:hover {
+    background: #667eea;
+    color: white;
+}
+
+.container {
+    padding: 40px 30px;
+}
+
+.welcome-header {
+    color: white;
+    margin-bottom: 30px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.stat {
+    font-size: 36px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.profile-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    background: white;
+    color: #667eea;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 auto 20px;
+}
+
+.profile-details .card {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.info-group {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+}
+
+.info-group:last-child {
+    border-bottom: none;
+}
+
+.info-group label {
+    font-weight: 500;
+    color: #666;
+}
+
+.welcome-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+    color: white;
+}
+
+.welcome-content h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.welcome-content p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.welcome-content .btn-primary {
+    display: inline-block;
+    width: auto;
+    padding: 15px 40px;
+}
+
+9. web.xml
+--------------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+    
+    <display-name>Demo Application</display-name>
+    
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+    
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+</web-app>
+
+
+Boilerplate code
+
