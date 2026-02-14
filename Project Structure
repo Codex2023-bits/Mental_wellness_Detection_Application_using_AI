@@ -1,0 +1,19 @@
+demo/
+├── pom.xml                   (Your configuration file)
+└── src
+    └── main
+        ├── java
+        │   └── org
+        │       └── example
+        │           ├── LoginServlet.java    <-- Backend logic for login
+        │           └── LogoutServlet.java   <-- Backend logic for logout
+        ├── resources
+        └── webapp
+            ├── css
+            │   └── sample.css               <-- Your styles
+            ├── WEB-INF
+            │   └── web.xml                  <-- Deployment descriptor (optional but good for safety)
+            ├── index.jsp                    <-- Login Page (Entry point)
+            ├── welcome.jsp                  <-- Landing Page (Fixed)
+            ├── dashboard.jsp                <-- Dashboard (Fixed)
+            └── profile.jsp                  <-- Profile (Fixed)
