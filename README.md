@@ -120,5 +120,6 @@ Sign-Up Page: Allow new users to register securely.
 
 8. License
 This project is for educational purposes as part of a Web Development curriculum.
+BIT college of engineering
 
 Developed by [ABISHAKE]
