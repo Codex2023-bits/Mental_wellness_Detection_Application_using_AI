@@ -97,7 +97,7 @@ http://localhost:8080/demo-1.0-SNAPSHOT/
 6. Usage Guide
 Login:
 
-Email: babishake8@gmail.com
+Email: anyone@gmail.com
 
 Password: password
 
@@ -121,4 +121,4 @@ Sign-Up Page: Allow new users to register securely.
 8. License
 This project is for educational purposes as part of a Web Development curriculum.
 
-Developed by [ABISHAEK]
+Developed by [ABISHAKE]
