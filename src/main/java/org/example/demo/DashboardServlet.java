@@ -6,6 +6,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
+import java.time.LocalDate;
 
 @WebServlet("/dashboard-api")
 public class DashboardServlet extends HttpServlet {
@@ -73,6 +74,44 @@ public class DashboardServlet extends HttpServlet {
                 json.append("]");
                 out.write(json.toString());
 
+            } else if ("profile-stats".equals(action)) {
+                // Total all-time meditation minutes
+                PreparedStatement ps1 = conn.prepareStatement(
+                        "SELECT COALESCE(SUM(duration_minutes), 0) AS total FROM meditation_logs WHERE email = ?");
+                ps1.setString(1, email);
+                ResultSet rs1 = ps1.executeQuery();
+                rs1.next();
+                int totalMed = rs1.getInt("total");
+
+                // Total all-time exercise minutes
+                PreparedStatement ps2 = conn.prepareStatement(
+                        "SELECT COALESCE(SUM(duration_minutes), 0) AS total FROM exercise_logs WHERE email = ?");
+                ps2.setString(1, email);
+                ResultSet rs2 = ps2.executeQuery();
+                rs2.next();
+                int totalEx = rs2.getInt("total");
+
+                // Days active (meditation)
+                PreparedStatement ps3 = conn.prepareStatement(
+                        "SELECT COUNT(DISTINCT logged_date) AS days FROM meditation_logs WHERE email = ?");
+                ps3.setString(1, email);
+                ResultSet rs3 = ps3.executeQuery();
+                rs3.next();
+                int medDays = rs3.getInt("days");
+
+                // Days active (exercise)
+                PreparedStatement ps4 = conn.prepareStatement(
+                        "SELECT COUNT(DISTINCT logged_date) AS days FROM exercise_logs WHERE email = ?");
+                ps4.setString(1, email);
+                ResultSet rs4 = ps4.executeQuery();
+                rs4.next();
+                int exDays = rs4.getInt("days");
+
+                out.write("{\"meditationMinutes\":" + totalMed +
+                        ",\"exerciseMinutes\":" + totalEx +
+                        ",\"meditationDays\":" + medDays +
+                        ",\"exerciseDays\":" + exDays + "}");
+
             } else {
                 out.write("{\"error\":\"Unknown action\"}");
             }
@@ -105,16 +144,20 @@ public class DashboardServlet extends HttpServlet {
             if ("log-meditation".equals(action)) {
                 String minutes = request.getParameter("minutes");
                 String date = request.getParameter("date");
-                if (minutes == null || date == null) {
-                    out.write("{\"error\":\"Missing minutes or date\"}");
+                if (minutes == null) {
+                    out.write("{\"error\":\"Missing minutes\"}");
                     return;
                 }
+                // Use server-side LocalDate.now() if no date provided (timer auto-log)
+                LocalDate logDate = (date != null && !date.isEmpty())
+                        ? LocalDate.parse(date)
+                        : LocalDate.now();
 
                 PreparedStatement ps = conn.prepareStatement(
                         "INSERT INTO meditation_logs (email, duration_minutes, logged_date) VALUES (?, ?, ?)");
                 ps.setString(1, email);
                 ps.setInt(2, Integer.parseInt(minutes));
-                ps.setDate(3, Date.valueOf(date));
+                ps.setDate(3, Date.valueOf(logDate));
                 ps.executeUpdate();
                 out.write("{\"success\":true}");
 
@@ -133,6 +176,13 @@ public class DashboardServlet extends HttpServlet {
                 ps.setString(2, type);
                 ps.setInt(3, Integer.parseInt(minutes));
                 ps.setDate(4, Date.valueOf(date));
+                ps.executeUpdate();
+                out.write("{\"success\":true}");
+
+            } else if ("reset-meditation".equals(action)) {
+                PreparedStatement ps = conn.prepareStatement(
+                        "DELETE FROM meditation_logs WHERE email = ?");
+                ps.setString(1, email);
                 ps.executeUpdate();
                 out.write("{\"success\":true}");
 

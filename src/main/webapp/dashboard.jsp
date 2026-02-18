@@ -112,6 +112,9 @@
                                     </button>
                                 </div>
                             </div>
+                            <button class="dash-reset-btn" id="resetMedBtn">
+                                <i class="fa-solid fa-trash-can"></i> Reset Progress
+                            </button>
                         </div>
                     </div>
 
@@ -146,6 +149,42 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- AI Report Section -->
+                <div class="dash-grid dash-grid-single">
+                    <div class="dash-card" style="text-align: center;">
+                        <div class="dash-card-header" style="justify-content: center;">
+                            <i class="fa-solid fa-robot"></i>
+                            <h3>AI Wellness Report</h3>
+                        </div>
+                        <p style="color: var(--soft-gray); font-size: 0.85rem; margin-bottom: 16px;">
+                            Generate a personalized wellness report using your meditation and exercise data.
+                        </p>
+                        <button class="dash-log-btn" id="generateReportBtn"
+                            style="padding: 12px 32px; font-size: 0.9rem;">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Modal -->
+            <div class="report-modal-overlay" id="reportModal" style="display: none;">
+                <div class="report-modal">
+                    <div class="report-modal-header">
+                        <h3><i class="fa-solid fa-robot"></i> Your Wellness Report</h3>
+                        <button class="report-close-btn" id="closeReportBtn">&times;</button>
+                    </div>
+                    <div class="report-modal-body" id="reportBody">
+                        <div class="report-loading" id="reportLoading">
+                            <i class="fa-solid fa-spinner fa-spin"
+                                style="font-size: 2rem; color: var(--primary-lavender);"></i>
+                            <p>Analyzing your wellness data...</p>
+                            <p style="font-size: 0.75rem;">This may take 15-30 seconds</p>
+                        </div>
+                        <div class="report-content" id="reportContent" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -289,11 +328,10 @@
                 });
 
                 function logMeditationFromTimer(minutes) {
-                    const today = new Date().toISOString().split('T')[0];
+                    // No date sent — server uses LocalDate.now() for accuracy
                     const params = new URLSearchParams();
                     params.append('action', 'log-meditation');
                     params.append('minutes', minutes);
-                    params.append('date', today);
                     fetch('dashboard-api?action=log-meditation', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -460,6 +498,57 @@
                             loadExerciseChart();
                         }
                     });
+                });
+
+                // Reset meditation progress
+                document.getElementById('resetMedBtn').addEventListener('click', function () {
+                    if (!confirm('Clear all meditation history? This cannot be undone.')) return;
+                    fetch('dashboard-api?action=reset-meditation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    }).then(r => r.json()).then(d => {
+                        if (d.success) loadMeditationChart();
+                    });
+                });
+
+                // ========== AI REPORT ==========
+                document.getElementById('generateReportBtn').addEventListener('click', function () {
+                    const modal = document.getElementById('reportModal');
+                    const loading = document.getElementById('reportLoading');
+                    const content = document.getElementById('reportContent');
+                    modal.style.display = 'flex';
+                    loading.style.display = 'flex';
+                    content.style.display = 'none';
+
+                    fetch('report-api')
+                        .then(r => r.json())
+                        .then(data => {
+                            loading.style.display = 'none';
+                            content.style.display = 'block';
+                            if (data.error) {
+                                content.innerHTML = '<div style="color:#ef4444; text-align:center;">' +
+                                    '<i class="fa-solid fa-circle-exclamation" style="font-size:2rem; margin-bottom:12px;"></i>' +
+                                    '<p>' + data.error + '</p></div>';
+                            } else {
+                                // Convert newlines to paragraphs
+                                const paragraphs = data.report.split('\n').filter(p => p.trim())
+                                    .map(p => '<p>' + p + '</p>').join('');
+                                content.innerHTML = paragraphs;
+                            }
+                        })
+                        .catch(err => {
+                            loading.style.display = 'none';
+                            content.style.display = 'block';
+                            content.innerHTML = '<p style="color:#ef4444;">Failed to connect. Is Ollama running?</p>';
+                        });
+                });
+
+                document.getElementById('closeReportBtn').addEventListener('click', function () {
+                    document.getElementById('reportModal').style.display = 'none';
+                });
+
+                document.getElementById('reportModal').addEventListener('click', function (e) {
+                    if (e.target === this) this.style.display = 'none';
                 });
             </script>
         </body>
