@@ -4,6 +4,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -23,6 +25,10 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("user", email);
             session.setAttribute("email", email);
+
+            // Store login time for profile page
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+            session.setAttribute("loginTime", LocalDateTime.now().format(dtf));
 
             // Redirect to dashboard
             response.sendRedirect("dashboard.jsp");
