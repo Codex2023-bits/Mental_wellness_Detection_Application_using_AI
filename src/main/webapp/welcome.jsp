@@ -1,7 +1,13 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <% // Session Validation Logic String email=(String) session.getAttribute("user"); String loginTime=(String)
-        session.getAttribute("loginTime"); if (email==null || email.isEmpty()) {
-        response.sendRedirect("index.jsp?error=session"); return; } %>
+    <% 
+    String email=(String) session.getAttribute("user"); 
+    String loginTime=(String) session.getAttribute("loginTime"); 
+    if (email==null || email.isEmpty()) 
+    {
+        response.sendRedirect("index.jsp?error=session");
+         return; 
+    } 
+    %>
         <!DOCTYPE html>
         <html lang="en">
 
@@ -39,6 +45,9 @@
                                     </a>
                                     <a href="profile.jsp" class="btn btn-primary">
                                         <i class="fa-solid fa-user" style="margin-right: 8px;"></i>Profile
+                                    </a>
+                                    <a href="forum.jsp" class="btn btn-primary">
+                                        <i class="fa-solid fa-chart-line" style="margin-right: 8px;"></i>Dashboard
                                     </a>
                                 </div>
 

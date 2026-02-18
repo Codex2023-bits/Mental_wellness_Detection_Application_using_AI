@@ -1,2 +1,7 @@
-<% // invalidates the session to clear all data if (session !=null) { session.invalidate(); } // redirect back to login
-    page response.sendRedirect("index.jsp"); %>
+<% 
+    /* Safe Logout Logic */
+    if (session != null) { 
+        session.invalidate(); 
+    } 
+    response.sendRedirect("index.jsp"); 
+%>
