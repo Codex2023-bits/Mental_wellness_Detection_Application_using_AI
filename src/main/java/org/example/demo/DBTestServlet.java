@@ -23,31 +23,35 @@ public class DBTestServlet extends HttpServlet {
 
                         // 1. Create the users table
                         String createTable = "CREATE TABLE IF NOT EXISTS users (" +
-                                        "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                        "id SERIAL PRIMARY KEY, " +
                                         "email VARCHAR(255) NOT NULL UNIQUE, " +
                                         "password VARCHAR(255) NOT NULL)";
                         stmt.execute(createTable);
 
                         // 2. Insert demo users (using MERGE to avoid duplicate errors if run twice)
-                        String insertUser1 = "MERGE INTO users (email, password) KEY(email) " +
-                                        "VALUES ('babishake8@gmail.com', 'password')";
+                        String insertUser1 = "INSERT INTO users (email, password) " +
+                                        "VALUES ('babishake8@gmail.com', 'password') " +
+                                        "ON CONFLICT (email) DO NOTHING";
                         stmt.execute(insertUser1);
 
-                        String insertUser2 = "MERGE INTO users (email, password) KEY(email) " +
-                                        "VALUES ('alice@example.com', 'password')";
+                        String insertUser2 = "INSERT INTO users (email, password) " +
+                                        "VALUES ('alice@example.com', 'password') " +
+                                        "ON CONFLICT (email) DO NOTHING";
                         stmt.execute(insertUser2);
 
-                        String insertUser3 = "MERGE INTO users (email, password) KEY(email) " +
-                                        "VALUES ('bob@example.com', 'password')";
+                        String insertUser3 = "INSERT INTO users (email, password) " +
+                                        "VALUES ('bob@example.com', 'password') " +
+                                        "ON CONFLICT (email) DO NOTHING";
                         stmt.execute(insertUser3);
 
-                        String insertUser4 = "MERGE INTO users (email, password) KEY(email) " +
-                                        "VALUES ('charlie@example.com', 'password')";
+                        String insertUser4 = "INSERT INTO users (email, password) " +
+                                        "VALUES ('charlie@example.com', 'password') " +
+                                        "ON CONFLICT (email) DO NOTHING";
                         stmt.execute(insertUser4);
 
                         // 3. Create the messages table for private chat
                         String createMessages = "CREATE TABLE IF NOT EXISTS messages (" +
-                                        "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                        "id SERIAL PRIMARY KEY, " +
                                         "sender_email VARCHAR(255) NOT NULL, " +
                                         "receiver_email VARCHAR(255) NOT NULL, " +
                                         "content TEXT NOT NULL, " +
@@ -56,7 +60,7 @@ public class DBTestServlet extends HttpServlet {
 
                         // 4. Create meditation logs table
                         String createMeditation = "CREATE TABLE IF NOT EXISTS meditation_logs (" +
-                                        "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                        "id SERIAL PRIMARY KEY, " +
                                         "email VARCHAR(255) NOT NULL, " +
                                         "duration_minutes INT NOT NULL, " +
                                         "logged_date DATE NOT NULL)";
@@ -64,7 +68,7 @@ public class DBTestServlet extends HttpServlet {
 
                         // 5. Create exercise logs table
                         String createExercise = "CREATE TABLE IF NOT EXISTS exercise_logs (" +
-                                        "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                                        "id SERIAL PRIMARY KEY, " +
                                         "email VARCHAR(255) NOT NULL, " +
                                         "exercise_type VARCHAR(100) NOT NULL, " +
                                         "duration_minutes INT NOT NULL, " +
