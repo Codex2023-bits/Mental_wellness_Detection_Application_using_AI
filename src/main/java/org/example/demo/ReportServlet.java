@@ -12,7 +12,7 @@ import java.sql.*;
 public class ReportServlet extends HttpServlet {
 
     private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String GROQ_MODEL = "llama3-8b-8192";
+    private static final String GROQ_MODEL = "llama-3.1-8b-instant";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
