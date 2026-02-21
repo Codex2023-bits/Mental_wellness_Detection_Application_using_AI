@@ -11,8 +11,8 @@ import java.sql.*;
 @WebServlet("/report-api")
 public class ReportServlet extends HttpServlet {
 
-    private static final String OLLAMA_URL = "http://localhost:11434/api/generate";
-    private static final String MODEL = "tinyllama";
+    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String GROQ_MODEL = "llama3-8b-8192";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,6 +23,14 @@ public class ReportServlet extends HttpServlet {
             response.setStatus(401);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Not logged in\"}");
+            return;
+        }
+
+        String apiKey = System.getenv("GROQ_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter()
+                    .write("{\"error\":\"AI service is not configured. Please contact the administrator.\"}");
             return;
         }
 
@@ -66,39 +74,39 @@ public class ReportServlet extends HttpServlet {
                 exerciseData.append("No exercise data recorded.\n");
 
             // Build prompt
-            String prompt = "You are a friendly wellness coach. Based on the following 7-day wellness data, " +
+            String userMessage = "You are a friendly wellness coach. Based on the following 7-day wellness data, " +
                     "write a short, encouraging wellness report (3-4 paragraphs). Include observations about " +
                     "patterns, suggestions for improvement, and positive reinforcement. Keep it concise and warm.\n\n" +
                     "MEDITATION LOG (last 7 days):\n" + meditationData +
                     "\nEXERCISE LOG (last 7 days):\n" + exerciseData +
                     "\nWrite the report now:";
 
-            // Call Ollama
-            String aiResponse = callOllama(prompt);
+            // Call Groq
+            String aiResponse = callGroq(apiKey, userMessage);
             out.write("{\"report\":\"" + escapeJson(aiResponse) + "\"}");
 
         } catch (Exception e) {
-            String msg = e.getMessage();
-            if (msg != null && msg.contains("Connection refused")) {
-                out.write("{\"error\":\"Ollama is not running. Start it with: ollama serve\"}");
-            } else {
-                out.write("{\"error\":\"" + escapeJson(msg) + "\"}");
-            }
+            out.write("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
         }
     }
 
-    private String callOllama(String prompt) throws IOException {
-        URL url = new URL(OLLAMA_URL);
+    private String callGroq(String apiKey, String userMessage) throws IOException {
+        URL url = new URL(GROQ_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
         conn.setDoOutput(true);
-        conn.setConnectTimeout(5000);
-        conn.setReadTimeout(120000); // 2 min for generation
+        conn.setConnectTimeout(10000);
+        conn.setReadTimeout(60000);
 
-        // Build JSON request (stream: false for single response)
-        String jsonBody = "{\"model\":\"" + MODEL + "\",\"prompt\":\"" +
-                escapeJson(prompt) + "\",\"stream\":false}";
+        // Groq uses OpenAI-compatible Chat Completions format
+        String jsonBody = "{" +
+                "\"model\":\"" + GROQ_MODEL + "\"," +
+                "\"messages\":[{\"role\":\"user\",\"content\":\"" + escapeJson(userMessage) + "\"}]," +
+                "\"max_tokens\":1024," +
+                "\"temperature\":0.7" +
+                "}";
 
         try (OutputStream os = conn.getOutputStream()) {
             os.write(jsonBody.getBytes("UTF-8"));
@@ -118,17 +126,18 @@ public class ReportServlet extends HttpServlet {
         }
 
         if (status >= 200 && status < 300) {
-            // Extract "response" field from JSON manually
+            // Parse: choices[0].message.content
             String json = sb.toString();
-            int idx = json.indexOf("\"response\":\"");
+            String marker = "\"content\":\"";
+            int idx = json.indexOf(marker);
             if (idx != -1) {
-                int start = idx + 12;
+                int start = idx + marker.length();
                 int end = findJsonStringEnd(json, start);
                 return unescapeJson(json.substring(start, end));
             }
             return "Report generated but could not parse response.";
         } else {
-            throw new IOException("Ollama returned status " + status + ": " + sb);
+            throw new IOException("Groq API returned status " + status + ": " + sb);
         }
     }
 

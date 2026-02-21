@@ -539,7 +539,7 @@
                         .catch(err => {
                             loading.style.display = 'none';
                             content.style.display = 'block';
-                            content.innerHTML = '<p style="color:#ef4444;">Failed to connect. Is Ollama running?</p>';
+                            content.innerHTML = '<p style="color:#ef4444;">Failed to generate report. Please try again.</p>';
                         });
                 });
 
