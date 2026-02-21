@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBUtil {
+
     /*
      * POOLER LOGIC:
      * The host should end in '.pooler.supabase.com' and the port is usually 5432
@@ -12,12 +13,12 @@ public class DBUtil {
      * Username format: postgres.[PROJECT_REF]
      */
     private static final String URL = System.getenv("DB_URL") != null ? System.getenv("DB_URL")
-            : "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres?user=postgres.pbwfzhhuchelilcmtljm&password=A@8Wh7MD_M?mRts";
+            : "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres";
 
     private static final String USER = System.getenv("DB_USER") != null ? System.getenv("DB_USER")
             : "postgres.pbwfzhhuchelilcmtljm";
 
-    private static final String PASS = System.getenv("DB_PASS") != null ? System.getenv("DB_PASS") : "A@8Wh7MD_M?mRts";
+    private static final String PASS = System.getenv("DB_PASS");
 
     static {
         try {
