@@ -22,9 +22,9 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        try (java.sql.Connection conn = DBUtil.getConnection()) {
-            java.sql.PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM users WHERE email = ? AND password = ?");
+        try (java.sql.Connection conn = DBUtil.getConnection();
+                java.sql.PreparedStatement ps = conn.prepareStatement(
+                        "SELECT * FROM users WHERE email = ? AND password = ?");) {
             ps.setString(1, email);
             ps.setString(2, password);
             java.sql.ResultSet rs = ps.executeQuery();

@@ -37,7 +37,7 @@ public class ReportServlet extends HttpServlet {
             PreparedStatement ps1 = conn.prepareStatement(
                     "SELECT logged_date, SUM(duration_minutes) AS total " +
                             "FROM meditation_logs WHERE email = ? " +
-                            "AND logged_date >= DATEADD('DAY', -6, CURRENT_DATE) " +
+                            "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
                             "GROUP BY logged_date ORDER BY logged_date");
             ps1.setString(1, email);
             ResultSet rs1 = ps1.executeQuery();
@@ -53,7 +53,7 @@ public class ReportServlet extends HttpServlet {
             PreparedStatement ps2 = conn.prepareStatement(
                     "SELECT logged_date, exercise_type, SUM(duration_minutes) AS total " +
                             "FROM exercise_logs WHERE email = ? " +
-                            "AND logged_date >= DATEADD('DAY', -6, CURRENT_DATE) " +
+                            "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
                             "GROUP BY logged_date, exercise_type ORDER BY logged_date");
             ps2.setString(1, email);
             ResultSet rs2 = ps2.executeQuery();

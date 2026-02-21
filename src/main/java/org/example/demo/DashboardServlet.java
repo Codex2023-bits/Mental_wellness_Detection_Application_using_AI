@@ -32,47 +32,49 @@ public class DashboardServlet extends HttpServlet {
 
             if ("meditation-stats".equals(action)) {
                 // Get last 7 days of meditation data, grouped by date
-                PreparedStatement ps = conn.prepareStatement(
+                try (PreparedStatement ps = conn.prepareStatement(
                         "SELECT logged_date, SUM(duration_minutes) AS total_minutes " +
                                 "FROM meditation_logs WHERE email = ? " +
-                                "AND logged_date >= DATEADD('DAY', -6, CURRENT_DATE) " +
-                                "GROUP BY logged_date ORDER BY logged_date");
-                ps.setString(1, email);
-                ResultSet rs = ps.executeQuery();
+                                "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
+                                "GROUP BY logged_date ORDER BY logged_date")) {
+                    ps.setString(1, email);
+                    ResultSet rs = ps.executeQuery();
 
-                StringBuilder json = new StringBuilder("[");
-                boolean first = true;
-                while (rs.next()) {
-                    if (!first)
-                        json.append(",");
-                    json.append("{\"date\":\"").append(rs.getDate("logged_date").toString())
-                            .append("\",\"minutes\":").append(rs.getInt("total_minutes")).append("}");
-                    first = false;
+                    StringBuilder json = new StringBuilder("[");
+                    boolean first = true;
+                    while (rs.next()) {
+                        if (!first)
+                            json.append(",");
+                        json.append("{\"date\":\"").append(rs.getDate("logged_date").toString())
+                                .append("\",\"minutes\":").append(rs.getInt("total_minutes")).append("}");
+                        first = false;
+                    }
+                    json.append("]");
+                    out.write(json.toString());
                 }
-                json.append("]");
-                out.write(json.toString());
 
             } else if ("exercise-stats".equals(action)) {
                 // Get last 7 days of exercise data, grouped by date
-                PreparedStatement ps = conn.prepareStatement(
+                try (PreparedStatement ps = conn.prepareStatement(
                         "SELECT logged_date, SUM(duration_minutes) AS total_minutes " +
                                 "FROM exercise_logs WHERE email = ? " +
-                                "AND logged_date >= DATEADD('DAY', -6, CURRENT_DATE) " +
-                                "GROUP BY logged_date ORDER BY logged_date");
-                ps.setString(1, email);
-                ResultSet rs = ps.executeQuery();
+                                "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
+                                "GROUP BY logged_date ORDER BY logged_date")) {
+                    ps.setString(1, email);
+                    ResultSet rs = ps.executeQuery();
 
-                StringBuilder json = new StringBuilder("[");
-                boolean first = true;
-                while (rs.next()) {
-                    if (!first)
-                        json.append(",");
-                    json.append("{\"date\":\"").append(rs.getDate("logged_date").toString())
-                            .append("\",\"minutes\":").append(rs.getInt("total_minutes")).append("}");
-                    first = false;
+                    StringBuilder json = new StringBuilder("[");
+                    boolean first = true;
+                    while (rs.next()) {
+                        if (!first)
+                            json.append(",");
+                        json.append("{\"date\":\"").append(rs.getDate("logged_date").toString())
+                                .append("\",\"minutes\":").append(rs.getInt("total_minutes")).append("}");
+                        first = false;
+                    }
+                    json.append("]");
+                    out.write(json.toString());
                 }
-                json.append("]");
-                out.write(json.toString());
 
             } else if ("profile-stats".equals(action)) {
                 // Total all-time meditation minutes
