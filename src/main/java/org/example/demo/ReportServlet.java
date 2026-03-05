@@ -1,18 +1,27 @@
 package org.example.demo;
 
+import dev.langchain4j.model.ollama.OllamaChatModel;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.*;
+import java.time.Duration;
 
 @WebServlet("/report-api")
 public class ReportServlet extends HttpServlet {
 
-    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String GROQ_MODEL = "llama-3.1-8b-instant";
+    private OllamaChatModel model;
+
+    @Override
+    public void init() throws ServletException {
+        // Initialize the local Ollama model
+        model = OllamaChatModel.builder()
+                .baseUrl("http://localhost:11434")
+                .modelName("llama3")
+                .timeout(Duration.ofSeconds(60))
+                .build();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,14 +32,6 @@ public class ReportServlet extends HttpServlet {
             response.setStatus(401);
             response.setContentType("application/json");
             response.getWriter().write("{\"error\":\"Not logged in\"}");
-            return;
-        }
-
-        String apiKey = System.getenv("GROQ_API_KEY");
-        if (apiKey == null || apiKey.isEmpty()) {
-            response.setContentType("application/json; charset=UTF-8");
-            response.getWriter()
-                    .write("{\"error\":\"AI service is not configured. Please contact the administrator.\"}");
             return;
         }
 
@@ -74,91 +75,23 @@ public class ReportServlet extends HttpServlet {
                 exerciseData.append("No exercise data recorded.\n");
 
             // Build prompt
-            String userMessage = "You are a friendly wellness coach. Based on the following 7-day wellness data, " +
+            String systemPrompt = "You are a friendly wellness coach. Based on the following 7-day wellness data, " +
                     "write a short, encouraging wellness report (3-4 paragraphs). Include observations about " +
-                    "patterns, suggestions for improvement, and positive reinforcement. Keep it concise and warm.\n\n" +
-                    "MEDITATION LOG (last 7 days):\n" + meditationData +
-                    "\nEXERCISE LOG (last 7 days):\n" + exerciseData +
-                    "\nWrite the report now:";
+                    "patterns, suggestions for improvement, and positive reinforcement. Keep it concise and warm.";
 
-            // Call Groq
-            String aiResponse = callGroq(apiKey, userMessage);
+            String userData = "USER: " + email + "\n\n" +
+                    "MEDITATION LOG (last 7 days):\n" + meditationData +
+                    "\nEXERCISE LOG (last 7 days):\n" + exerciseData;
+
+            // Call Local AI (Ollama)
+            String aiResponse = model.generate(systemPrompt + "\n\n" + userData);
+
             out.write("{\"report\":\"" + escapeJson(aiResponse) + "\"}");
 
         } catch (Exception e) {
-            out.write("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
+            e.printStackTrace();
+            out.write("{\"error\":\"Failed to connect to local AI. Ensure Ollama is running with llama3 model.\"}");
         }
-    }
-
-    private String callGroq(String apiKey, String userMessage) throws IOException {
-        URL url = new URL(GROQ_URL);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
-        conn.setDoOutput(true);
-        conn.setConnectTimeout(10000);
-        conn.setReadTimeout(60000);
-
-        // Groq uses OpenAI-compatible Chat Completions format
-        String jsonBody = "{" +
-                "\"model\":\"" + GROQ_MODEL + "\"," +
-                "\"messages\":[{\"role\":\"user\",\"content\":\"" + escapeJson(userMessage) + "\"}]," +
-                "\"max_tokens\":1024," +
-                "\"temperature\":0.7" +
-                "}";
-
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes("UTF-8"));
-        }
-
-        int status = conn.getResponseCode();
-        InputStream is = (status >= 200 && status < 300)
-                ? conn.getInputStream()
-                : conn.getErrorStream();
-
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-        }
-
-        if (status >= 200 && status < 300) {
-            // Parse: choices[0].message.content
-            String json = sb.toString();
-            String marker = "\"content\":\"";
-            int idx = json.indexOf(marker);
-            if (idx != -1) {
-                int start = idx + marker.length();
-                int end = findJsonStringEnd(json, start);
-                return unescapeJson(json.substring(start, end));
-            }
-            return "Report generated but could not parse response.";
-        } else {
-            throw new IOException("Groq API returned status " + status + ": " + sb);
-        }
-    }
-
-    /** Find the end of a JSON string value (handling escaped quotes) */
-    private int findJsonStringEnd(String json, int start) {
-        for (int i = start; i < json.length(); i++) {
-            if (json.charAt(i) == '\\') {
-                i++; // skip escaped char
-            } else if (json.charAt(i) == '"') {
-                return i;
-            }
-        }
-        return json.length();
-    }
-
-    private String unescapeJson(String text) {
-        return text.replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\\\", "\\");
     }
 
     private String escapeJson(String text) {

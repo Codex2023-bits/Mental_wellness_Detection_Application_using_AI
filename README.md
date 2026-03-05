@@ -118,9 +118,9 @@ After first deploy, visit `https://your-app.onrender.com/demo/db-setup` once to 
 
 ---
 
-## 🤖 Local AI Setup (Wellness Assistant)
+## 🤖 Local AI Features (Wellness Report & Score)
 
-This project includes a private AI Wellness Assistant powered by **Ollama** and **LangChain4j**.
+This project uses **Ollama** and **LangChain4j** for private, local AI processing.
 
 ### Prerequisites
 1.  **Install Ollama**: Download and install from [ollama.com](https://ollama.com/).
@@ -131,7 +131,9 @@ This project includes a private AI Wellness Assistant powered by **Ollama** and 
 3.  **Run Ollama**: Keep the Ollama application running in the background while using the dashboard.
 
 ### How it works
-The `AIAssistantServlet` connects to your local Ollama instance on port `11434`. No data is sent to external servers, ensuring 100% privacy for your mental wellness conversations.
+- **Wellness Report**: When you click "Generate Report", the `ReportServlet` sends your 7-day data to your local Ollama instance on port `11434`.
+- **Wellness Score**: Your profile assessment now integrates local AI insights for suggestions and quotes.
+- **Privacy**: No data leaves your machine. Your mental wellness journey remains 100% private.
 
 ---
 
