@@ -6,12 +6,15 @@ import java.sql.SQLException;
 
 public class DBUtil {
 
+
     /*
      * POOLER LOGIC:
      * The host should end in '.pooler.supabase.com' and the port is usually 5432
      * for Session mode.
      * Username format: postgres.[PROJECT_REF]
      */
+
+    
     private static final String URL = System.getenv("DB_URL") != null ? System.getenv("DB_URL")
             : "jdbc:postgresql://aws-1-ap-south-1.pooler.supabase.com:5432/postgres";
 
