@@ -115,6 +115,24 @@ Set these environment variables in your Render service dashboard:
 
 After first deploy, visit `https://your-app.onrender.com/demo/db-setup` once to initialize the database.
 
+
+---
+
+## 🤖 Local AI Setup (Wellness Assistant)
+
+This project includes a private AI Wellness Assistant powered by **Ollama** and **LangChain4j**.
+
+### Prerequisites
+1.  **Install Ollama**: Download and install from [ollama.com](https://ollama.com/).
+2.  **Pull the Model**: Run the following command in your terminal:
+    ```bash
+    ollama pull llama3
+    ```
+3.  **Run Ollama**: Keep the Ollama application running in the background while using the dashboard.
+
+### How it works
+The `AIAssistantServlet` connects to your local Ollama instance on port `11434`. No data is sent to external servers, ensuring 100% privacy for your mental wellness conversations.
+
 ---
 
 ## Available Endpoints

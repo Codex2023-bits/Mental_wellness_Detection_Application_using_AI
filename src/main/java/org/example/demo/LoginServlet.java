@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
 
@@ -24,23 +26,29 @@ public class LoginServlet extends HttpServlet {
 
         try (java.sql.Connection conn = DBUtil.getConnection();
                 java.sql.PreparedStatement ps = conn.prepareStatement(
-                        "SELECT * FROM users WHERE email = ? AND password = ?");) {
+                        "SELECT password FROM users WHERE email = ?");) {
             ps.setString(1, email);
-            ps.setString(2, password);
             java.sql.ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                // Login successful
-                HttpSession session = request.getSession();
-                session.setAttribute("user", email);
+                String storedHash = rs.getString("password");
 
-                // Store login time
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
-                session.setAttribute("loginTime", LocalDateTime.now().format(dtf));
+                if (BCrypt.checkpw(password, storedHash)) {
+                    // Login successful
+                    HttpSession session = request.getSession();
+                    session.setAttribute("user", email);
 
-                response.sendRedirect("dashboard.jsp");
+                    // Store login time
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+                    session.setAttribute("loginTime", LocalDateTime.now().format(dtf));
+
+                    response.sendRedirect("dashboard.jsp");
+                } else {
+                    // Invalid credentials
+                    response.sendRedirect("index.jsp?error=invalid");
+                }
             } else {
-                // Invalid credentials
+                // User not found
                 response.sendRedirect("index.jsp?error=invalid");
             }
         } catch (Exception e) {

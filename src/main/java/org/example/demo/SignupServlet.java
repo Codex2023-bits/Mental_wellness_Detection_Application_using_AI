@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 @WebServlet("/signup")
 public class SignupServlet extends HttpServlet {
 
@@ -42,11 +44,14 @@ public class SignupServlet extends HttpServlet {
                 }
             }
 
+            // Hash the password
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
             // Insert new user
             String insertSql = "INSERT INTO users (email, password) VALUES (?, ?)";
             try (PreparedStatement psInsert = conn.prepareStatement(insertSql)) {
                 psInsert.setString(1, email);
-                psInsert.setString(2, password);
+                psInsert.setString(2, hashedPassword);
                 int affectedRows = psInsert.executeUpdate();
 
                 if (affectedRows > 0) {

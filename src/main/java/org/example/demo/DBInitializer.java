@@ -6,6 +6,8 @@ import jakarta.servlet.annotation.WebListener;
 import java.sql.Connection;
 import java.sql.Statement;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 @WebListener
 public class DBInitializer implements ServletContextListener {
 
@@ -22,12 +24,17 @@ public class DBInitializer implements ServletContextListener {
                     "password VARCHAR(255) NOT NULL)";
             stmt.execute(createTable);
 
-            // 2. Insert demo users
+            // 2. Insert demo users (with hashed passwords)
+            String hashedPwd = BCrypt.hashpw("password", BCrypt.gensalt());
             String[] demoUsers = {
-                    "INSERT INTO users (email, password) VALUES ('babishake8@gmail.com', 'password') ON CONFLICT (email) DO NOTHING",
-                    "INSERT INTO users (email, password) VALUES ('alice@example.com', 'password') ON CONFLICT (email) DO NOTHING",
-                    "INSERT INTO users (email, password) VALUES ('bob@example.com', 'password') ON CONFLICT (email) DO NOTHING",
-                    "INSERT INTO users (email, password) VALUES ('charlie@example.com', 'password') ON CONFLICT (email) DO NOTHING"
+                    "INSERT INTO users (email, password) VALUES ('babishake8@gmail.com', '" + hashedPwd
+                            + "') ON CONFLICT (email) DO NOTHING",
+                    "INSERT INTO users (email, password) VALUES ('alice@example.com', '" + hashedPwd
+                            + "') ON CONFLICT (email) DO NOTHING",
+                    "INSERT INTO users (email, password) VALUES ('bob@example.com', '" + hashedPwd
+                            + "') ON CONFLICT (email) DO NOTHING",
+                    "INSERT INTO users (email, password) VALUES ('charlie@example.com', '" + hashedPwd
+                            + "') ON CONFLICT (email) DO NOTHING"
             };
             for (String sql : demoUsers) {
                 stmt.execute(sql);
