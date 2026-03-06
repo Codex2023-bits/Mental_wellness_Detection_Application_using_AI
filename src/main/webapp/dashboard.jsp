@@ -1,6 +1,12 @@
+<%-- Update the top of dashboard.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <% String email=(String) session.getAttribute("user"); if (email==null || email.isEmpty()) {
-        response.sendRedirect("index.jsp?error=session"); return; } %>
+<% 
+    String email = (String) session.getAttribute("user");
+    if (email == null || email.isEmpty()) {
+        response.sendRedirect("index.jsp?error=session"); 
+        return;
+    } 
+%>
         <!DOCTYPE html>
         <html lang="en">
 

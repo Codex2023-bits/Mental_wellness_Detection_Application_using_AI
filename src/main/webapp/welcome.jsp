@@ -1,6 +1,14 @@
+<%-- Update the top of welcome.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <% String email=(String) session.getAttribute("user"); String loginTime=(String) session.getAttribute("loginTime");
-        if (email==null || email.isEmpty()) { response.sendRedirect("index.jsp?error=session"); return; } %>
+<% 
+    String email = (String) session.getAttribute("user"); 
+    String loginTime = (String) session.getAttribute("loginTime");
+    
+    if (email == null || email.isEmpty()) { 
+        response.sendRedirect("index.jsp?error=session"); 
+        return; 
+    } 
+%>
         <!DOCTYPE html>
         <html lang="en">
 

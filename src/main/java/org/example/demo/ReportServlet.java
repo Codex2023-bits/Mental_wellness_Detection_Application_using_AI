@@ -14,14 +14,14 @@ public class ReportServlet extends HttpServlet {
     private OllamaChatModel model;
 
     @Override
-    public void init() throws ServletException {
-        // Initialize the local Ollama model
-        model = OllamaChatModel.builder()
-                .baseUrl("http://localhost:11434")
-                .modelName("llama3")
-                .timeout(Duration.ofSeconds(60))
-                .build();
-    }
+public void init() throws ServletException {
+    // Using 127.0.0.1 is more stable for local service communication
+    model = OllamaChatModel.builder()
+            .baseUrl("http://127.0.0.1:11434")
+            .modelName("llama3")
+            .timeout(Duration.ofSeconds(120)) // Increased timeout for local processing
+            .build();
+}
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -75,9 +75,11 @@ public class ReportServlet extends HttpServlet {
                 exerciseData.append("No exercise data recorded.\n");
 
             // Build prompt
-            String systemPrompt = "You are a friendly wellness coach. Based on the following 7-day wellness data, " +
-                    "write a short, encouraging wellness report (3-4 paragraphs). Include observations about " +
-                    "patterns, suggestions for improvement, and positive reinforcement. Keep it concise and warm.";
+            String systemPrompt = "You are a wellness coach. Based on the 7-day data, " +
+                    "write a short, encouraging report. " +
+                    "CRITICAL: At the very end of your report, you MUST include a score and status on a new line in this exact format: "
+                    +
+                    "[SCORE: X/10] [STATUS: Your Status] where X is a number from 1 to 10 and 'Your Status' is a short 1-2 word status.";
 
             String userData = "USER: " + email + "\n\n" +
                     "MEDITATION LOG (last 7 days):\n" + meditationData +
@@ -90,7 +92,7 @@ public class ReportServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            out.write("{\"error\":\"Failed to connect to local AI. Ensure Ollama is running with llama3 model.\"}");
+            out.write("{\"error\":\"Failed to connect to local AI. Ensure Ollama is running with tinyllama model.\"}");
         }
     }
 

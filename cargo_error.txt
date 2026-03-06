@@ -1,0 +1,158 @@
+﻿[INFO] Error stacktraces are turned on.
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< org.example:demo >--------------------------
+[INFO] Building demo 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO] 
+[INFO] --- cargo:1.10.10:run (default-cli) @ demo ---
+[INFO] [en3.ContainerRunMojo] Resolved container artifact org.codehaus.cargo:cargo-core-container-tomcat:jar:1.10.10 for container tomcat10x
+[INFO] [beddedLocalContainer] Tomcat 10.x Embedded starting...
+[WARNING] [beddedLocalContainer] org.codehaus.cargo.container.ContainerException: Failed to create a Tomcat 10.x Embedded standalone configuration: Invalid configuration dir [C:\PBL Projects\TASK3\demo\target\cargo\configurations\tomcat10x]. When using standalone configurations, the configuration dir must point to an empty directory - Except if the configuration was created by Cargo.
+[ERROR] Starting container [org.codehaus.cargo.container.tomcat.Tomcat10xEmbeddedLocalContainer@49f3ff41] failed
+org.codehaus.cargo.container.ContainerException: Failed to create a Tomcat 10.x Embedded standalone configuration: Invalid configuration dir [C:\PBL Projects\TASK3\demo\target\cargo\configurations\tomcat10x]. When using standalone configurations, the configuration dir must point to an empty directory - Except if the configuration was created by Cargo.
+    at org.codehaus.cargo.container.spi.configuration.AbstractLocalConfiguration.configure (AbstractLocalConfiguration.java:276)
+    at org.codehaus.cargo.container.spi.configuration.builder.AbstractStandaloneLocalConfigurationWithXMLConfigurationBuilder.configure (AbstractStandaloneLocalConfigurationWithXMLConfigurationBuilder.java:121)
+    at org.codehaus.cargo.container.spi.AbstractLocalContainer.start (AbstractLocalContainer.java:202)
+    at org.codehaus.cargo.maven3.ContainerStartMojo.executeLocalContainerAction (ContainerStartMojo.java:83)
+    at org.codehaus.cargo.maven3.ContainerRunMojo.doExecute (ContainerRunMojo.java:117)
+    at org.codehaus.cargo.maven3.AbstractCargoMojo.execute (AbstractCargoMojo.java:459)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:283)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:226)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:407)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:348)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.apache.maven.wrapper.BootstrapMainStarter.start (BootstrapMainStarter.java:47)
+    at org.apache.maven.wrapper.WrapperExecutor.execute (WrapperExecutor.java:156)
+    at org.apache.maven.wrapper.MavenWrapperMain.main (MavenWrapperMain.java:72)
+Caused by: org.codehaus.cargo.container.ContainerException: Invalid configuration dir [C:\PBL Projects\TASK3\demo\target\cargo\configurations\tomcat10x]. When using standalone configurations, the configuration dir must point to an empty directory - Except if the configuration was created by Cargo.
+    at org.codehaus.cargo.container.spi.configuration.AbstractStandaloneLocalConfiguration.setupConfigurationDir (AbstractStandaloneLocalConfiguration.java:167)
+    at org.codehaus.cargo.container.tomcat.internal.AbstractCatalinaStandaloneLocalConfiguration.doConfigure (AbstractCatalinaStandaloneLocalConfiguration.java:120)
+    at org.codehaus.cargo.container.tomcat.Tomcat6xStandaloneLocalConfiguration.doConfigure (Tomcat6xStandaloneLocalConfiguration.java:55)
+    at org.codehaus.cargo.container.tomcat.Tomcat7xStandaloneLocalConfiguration.doConfigure (Tomcat7xStandaloneLocalConfiguration.java:78)
+    at org.codehaus.cargo.container.spi.configuration.AbstractLocalConfiguration.configure (AbstractLocalConfiguration.java:271)
+    at org.codehaus.cargo.container.spi.configuration.builder.AbstractStandaloneLocalConfigurationWithXMLConfigurationBuilder.configure (AbstractStandaloneLocalConfigurationWithXMLConfigurationBuilder.java:121)
+    at org.codehaus.cargo.container.spi.AbstractLocalContainer.start (AbstractLocalContainer.java:202)
+    at org.codehaus.cargo.maven3.ContainerStartMojo.executeLocalContainerAction (ContainerStartMojo.java:83)
+    at org.codehaus.cargo.maven3.ContainerRunMojo.doExecute (ContainerRunMojo.java:117)
+    at org.codehaus.cargo.maven3.AbstractCargoMojo.execute (AbstractCargoMojo.java:459)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:283)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:226)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:407)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:348)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke0 (Native Method)
+    at jdk.internal.reflect.NativeMethodAccessorImpl.invoke (NativeMethodAccessorImpl.java:77)
+    at jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke (DelegatingMethodAccessorImpl.java:43)
+    at java.lang.reflect.Method.invoke (Method.java:568)
+    at org.apache.maven.wrapper.BootstrapMainStarter.start (BootstrapMainStarter.java:47)
+    at org.apache.maven.wrapper.WrapperExecutor.execute (WrapperExecutor.java:156)
+    at org.apache.maven.wrapper.MavenWrapperMain.main (MavenWrapperMain.java:72)
+[INFO] Press Ctrl-C to stop the container...
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.335 s
+[INFO] Finished at: 2026-03-05T15:56:52+05:30
+[INFO] ------------------------------------------------------------------------
+.\mvnw.cmd : 
+Exception in thread 
+"Thread-1" java.lang.N
+oClassDefFoundError: o
+rg/codehaus/cargo/cont
+ainer/spi/jvm/DefaultJ
+vmLauncher
+At line:1 char:1
++ .\mvnw.cmd 
+cargo:run -DskipTests 
+-e 2>&1 | Out-File 
+-Encoding UTF8 "C ...
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Exception    
+ in th...aultJvmLa    
+uncher:String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+	at org.codehaus.cargo
+.maven3.ContainerRunMo
+jo$1.run(ContainerRunM
+ojo.java:73)
+Caused by: java.lang.C
+lassNotFoundException:
+ org.codehaus.cargo.co
+ntainer.spi.jvm.Defaul
+tJvmLauncher
+	at org.codehaus.plexu
+s.classworlds.strategy
+.SelfFirstStrategy.loa
+dClass(SelfFirstStrate
+gy.java:50)
+	at org.codehaus.plexu
+s.classworlds.realm.Cl
+assRealm.unsynchronize
+dLoadClass(ClassRealm.
+java:271)
+	at org.codehaus.plexu
+s.classworlds.realm.Cl
+assRealm.loadClass(Cla
+ssRealm.java:247)
+	at org.codehaus.plexu
+s.classworlds.realm.Cl
+assRealm.loadClass(Cla
+ssRealm.java:239)
+	... 1 more

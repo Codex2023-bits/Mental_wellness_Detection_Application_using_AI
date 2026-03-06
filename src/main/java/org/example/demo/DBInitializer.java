@@ -24,19 +24,22 @@ public class DBInitializer implements ServletContextListener {
                                         "password VARCHAR(255) NOT NULL)";
                         stmt.execute(createTable);
 
-                        // 2. Insert demo users (with hashed passwords)
+                        // 2. Refresh demo users (with hashed passwords)
                         String hashedPwd = BCrypt.hashpw("password", BCrypt.gensalt());
+                        
+
+                        // Delete existing to avoid conflicts during initialization
+                        stmt.execute("DELETE FROM users WHERE email IN ('babishake8@gmail.com', 'alice@example.com', 'bob@example.com', 'charlie@example.com')");
+
                         String[] demoUsers = {
                                         "INSERT INTO users (email, password) VALUES ('babishake8@gmail.com', '"
-                                                        + hashedPwd
-                                                        + "') ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password",
+                                                        + hashedPwd + "')",
                                         "INSERT INTO users (email, password) VALUES ('alice@example.com', '" + hashedPwd
-                                                        + "') ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password",
+                                                        + "')",
                                         "INSERT INTO users (email, password) VALUES ('bob@example.com', '" + hashedPwd
-                                                        + "') ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password",
+                                                        + "')",
                                         "INSERT INTO users (email, password) VALUES ('charlie@example.com', '"
-                                                        + hashedPwd
-                                                        + "') ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password"
+                                                        + hashedPwd + "')"
                         };
                         for (String sql : demoUsers) {
                                 stmt.execute(sql);
