@@ -124,8 +124,8 @@
                         </div>
                     </div>
 
-                    <!-- Row 2: Exercise Chart -->
-                    <div class="dash-grid dash-grid-single">
+                    <!-- Row 2: Exercise & Pedometer Charts -->
+                    <div class="dash-grid">
                         <div class="dash-card">
                             <div class="dash-card-header">
                                 <i class="fa-solid fa-dumbbell"></i>
@@ -151,6 +151,29 @@
                                         min="1">
                                     <button class="dash-log-btn" id="logExBtn">
                                         <i class="fa-solid fa-check"></i> Log
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pedometer Chart Card -->
+                        <div class="dash-card">
+                            <div class="dash-card-header">
+                                <i class="fa-solid fa-shoe-prints"></i>
+                                <h3>Pedometer Tracker</h3>
+                            </div>
+                            <div class="dash-chart-container">
+                                <canvas id="pedometerChart"></canvas>
+                            </div>
+                            <div class="dash-log-form">
+                                <h5><i class="fa-solid fa-plus-circle"></i> Manual Sync/Test</h5>
+                                <div class="dash-form-row" style="flex-wrap: wrap;">
+                                    <input type="date" id="pedDate" class="dash-input" style="flex-basis: 100%; margin-bottom: 8px;">
+                                    <input type="number" id="pedSteps" class="dash-input" placeholder="Steps" min="1" style="flex: 1; margin-right: 4px;">
+                                    <input type="number" step="0.1" id="pedDist" class="dash-input" placeholder="Distance (km)" min="0.1" style="flex: 1; margin-right: 4px;">
+                                    <input type="number" id="pedCal" class="dash-input" placeholder="Calories" min="1" style="flex: 1;">
+                                    <button class="dash-log-btn" id="logPedBtn" style="flex-basis: 100%; margin-top: 8px;">
+                                        <i class="fa-solid fa-check"></i> Sync Data
                                     </button>
                                 </div>
                             </div>
@@ -350,6 +373,7 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('medDate').value = today;
                 document.getElementById('exDate').value = today;
+                document.getElementById('pedDate').value = today;
 
                 function getLast7Days() {
                     const days = [];
@@ -369,20 +393,17 @@
                 // Meditation Chart
                 const medCtx = document.getElementById('meditationChart').getContext('2d');
                 const meditationChart = new Chart(medCtx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: getLast7Days().map(formatDateLabel),
                         datasets: [{
                             label: 'Minutes Meditated',
                             data: [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(155, 135, 245, 0.5)',
                             borderColor: '#9b87f5',
-                            backgroundColor: 'rgba(155, 135, 245, 0.15)',
-                            fill: true,
-                            tension: 0.4,
-                            borderWidth: 3,
-                            pointBackgroundColor: '#9b87f5',
-                            pointRadius: 5,
-                            pointHoverRadius: 7
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false
                         }]
                     },
                     options: {
@@ -429,6 +450,36 @@
                     }
                 });
 
+                // Pedometer Chart
+                const pedCtx = document.getElementById('pedometerChart').getContext('2d');
+                const pedometerChart = new Chart(pedCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: getLast7Days().map(formatDateLabel),
+                        datasets: [{
+                            label: 'Steps taken',
+                            data: [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(79, 70, 229, 0.5)',
+                            borderColor: '#4f46e5',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true, title: { display: true, text: 'Steps' },
+                                grid: { color: 'rgba(0,0,0,0.05)' }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+
                 function loadMeditationChart() {
                     fetch('dashboard-api?action=meditation-stats')
                         .then(r => r.json())
@@ -457,9 +508,24 @@
                         });
                 }
 
+                function loadPedometerChart() {
+                    fetch('dashboard-api?action=pedometer-stats')
+                        .then(r => r.json())
+                        .then(data => {
+                            const days = getLast7Days();
+                            const values = days.map(d => {
+                                const entry = data.find(e => e.date === d);
+                                return entry ? entry.steps : 0;
+                            });
+                            pedometerChart.data.datasets[0].data = values;
+                            pedometerChart.update();
+                        });
+                }
+
                 // Load charts on page load
                 loadMeditationChart();
                 loadExerciseChart();
+                loadPedometerChart();
 
                 // ========== MANUAL LOG FORMS ==========
                 document.getElementById('logMedBtn').addEventListener('click', function () {
@@ -502,6 +568,31 @@
                         if (d.success) {
                             document.getElementById('exMinutes').value = '';
                             loadExerciseChart();
+                        }
+                    });
+                });
+
+                document.getElementById('logPedBtn').addEventListener('click', function () {
+                    const date = document.getElementById('pedDate').value;
+                    const steps = document.getElementById('pedSteps').value;
+                    const dist = document.getElementById('pedDist').value;
+                    const cal = document.getElementById('pedCal').value;
+                    if (!date || !steps || !dist || !cal || steps <= 0) { alert('Please enter valid pedometer data.'); return; }
+
+                    const payload = JSON.stringify({ steps: parseInt(steps) });
+                    fetch('/sync-pedometer', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    }).then(r => r.text()).then(msg => {
+                        console.log('Sync response:', msg);
+                        if (msg.includes('Sync successful')) {
+                            document.getElementById('pedSteps').value = '';
+                            document.getElementById('pedDist').value = '';
+                            document.getElementById('pedCal').value = '';
+                            loadPedometerChart();
+                        } else {
+                            alert('Sync failed: ' + msg);
                         }
                     });
                 });

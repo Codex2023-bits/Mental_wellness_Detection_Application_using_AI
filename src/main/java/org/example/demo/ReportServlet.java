@@ -1,6 +1,6 @@
 package org.example.demo;
 
-import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.openai.OpenAiChatModel;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -11,17 +11,24 @@ import java.time.Duration;
 @WebServlet("/report-api")
 public class ReportServlet extends HttpServlet {
 
-    private OllamaChatModel model;
+    private OpenAiChatModel model;
 
     @Override
-public void init() throws ServletException {
-    // Using 127.0.0.1 is more stable for local service communication
-    model = OllamaChatModel.builder()
-            .baseUrl("http://127.0.0.1:11434")
-            .modelName("llama3")
-            .timeout(Duration.ofSeconds(120)) // Increased timeout for local processing
-            .build();
-}
+    public void init() throws ServletException {
+        // Retrieve Groq API Key from environment or use fallback
+        String apiKey = System.getenv("GROQ_API_KEY");
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            apiKey = "YOUR_GROQ_API_KEY"; // Ensure this matches Environment Variable, do not hardcode real keys!
+            System.err.println("WARNING: GROQ_API_KEY environment variable is not set!");
+        }
+
+        model = OpenAiChatModel.builder()
+                .apiKey(apiKey)
+                .baseUrl("https://api.groq.com/openai/v1")
+                .modelName("llama-3.1-8b-instant")
+                .timeout(Duration.ofSeconds(120))
+                .build();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -74,25 +81,72 @@ public void init() throws ServletException {
             if (exerciseData.length() == 0)
                 exerciseData.append("No exercise data recorded.\n");
 
+            // Fetch pedometer data (last 7 days) – manual logs
+            StringBuilder pedometerData = new StringBuilder();
+            PreparedStatement ps3 = conn.prepareStatement(
+                    "SELECT logged_date, SUM(steps) AS total_steps, SUM(distance_km) AS total_dist, SUM(calories_burned) AS total_cal " +
+                            "FROM pedometer_logs WHERE email = ? " +
+                            "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
+                            "GROUP BY logged_date ORDER BY logged_date");
+            ps3.setString(1, email);
+            ResultSet rs3 = ps3.executeQuery();
+            while (rs3.next()) {
+                pedometerData.append(rs3.getDate("logged_date"))
+                        .append(": ").append(rs3.getInt("total_steps")).append(" steps")
+                        .append(", ").append(rs3.getDouble("total_dist")).append(" km")
+                        .append(", ").append(rs3.getInt("total_cal")).append(" kcal\n");
+            }
+            if (pedometerData.length() == 0)
+                pedometerData.append("No pedometer data recorded.\n");
+
+            // Task 3 – Fetch Behavioral Activation data (mobile health connect)
+            StringBuilder mobileStepData = new StringBuilder();
+            try {
+                for (java.util.Map<String, Object> row : DBUtil.getLast7DaysActivity(email)) {
+                    mobileStepData.append(row.get("date"))
+                            .append(": ").append(row.get("steps")).append(" steps (mobile)\n");
+                }
+            } catch (Exception ignored) {}
+            if (mobileStepData.length() == 0)
+                mobileStepData.append("No mobile step data available.\n");
+
+            // Compute 7-day average steps from mobile data for correlation
+            int totalMobileSteps = 0;
+            int mobileDataDays  = 0;
+            try {
+                for (java.util.Map<String, Object> row : DBUtil.getLast7DaysActivity(email)) {
+                    totalMobileSteps += (int) row.get("steps");
+                    mobileDataDays++;
+                }
+            } catch (Exception ignored) {}
+            double avgSteps = mobileDataDays > 0 ? (double) totalMobileSteps / mobileDataDays : 0;
+            String activityLevel = avgSteps >= 8000 ? "HIGH" : avgSteps >= 4000 ? "MODERATE" : "LOW";
+
             // Build prompt
-            String systemPrompt = "You are a wellness coach. Based on the 7-day data, " +
-                    "write a short, encouraging report. " +
-                    "CRITICAL: At the very end of your report, you MUST include a score and status on a new line in this exact format: "
-                    +
-                    "[SCORE: X/10] [STATUS: Your Status] where X is a number from 1 to 10 and 'Your Status' is a short 1-2 word status.";
+            String systemPrompt = "You are a wellness coach specialising in Behavioural Activation. " +
+                    "Based on the 7-day data below, write a short, encouraging report. " +
+                    "Pay special attention to the MOBILE STEP DATA section: if activity_level is LOW or MODERATE, " +
+                    "explicitly note how low physical activity may be correlating with a decline in mental wellness " +
+                    "and suggest one concrete Behavioural Activation exercise. " +
+                    "CRITICAL: At the very end of your report, include a score and status on a new line in this exact format: " +
+                    "[SCORE: X/10] [STATUS: Your Status] where X is 1-10 and 'Your Status' is a short 1-2 word status.";
 
             String userData = "USER: " + email + "\n\n" +
                     "MEDITATION LOG (last 7 days):\n" + meditationData +
-                    "\nEXERCISE LOG (last 7 days):\n" + exerciseData;
+                    "\nEXERCISE LOG (last 7 days):\n" + exerciseData +
+                    "\nPEDOMETER LOG (last 7 days):\n" + pedometerData +
+                    "\nMOBILE STEP DATA – Behavioural Activation (Health Connect):\n" + mobileStepData +
+                    "\nCALCULATED ACTIVITY LEVEL: " + activityLevel +
+                    " (7-day avg: " + String.format("%.0f", avgSteps) + " steps/day)";
 
-            // Call Local AI (Ollama)
+            // Call Groq AI via OpenAiChatModel
             String aiResponse = model.generate(systemPrompt + "\n\n" + userData);
 
             out.write("{\"report\":\"" + escapeJson(aiResponse) + "\"}");
 
         } catch (Exception e) {
             e.printStackTrace();
-            out.write("{\"error\":\"Failed to connect to local AI. Ensure Ollama is running with tinyllama model.\"}");
+            out.write("{\"error\":\"Failed to connect to AI. Ensure GROQ_API_KEY is valid.\"}");
         }
     }
 

@@ -53,7 +53,10 @@ public class LoginServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("index.jsp?error=server");
+            try {
+                java.nio.file.Files.writeString(java.nio.file.Paths.get("backend_error.txt"), e.toString() + "\n" + java.util.Arrays.toString(e.getStackTrace()));
+            } catch(Exception ignored){}
+            response.sendRedirect("index.jsp?error=server&msg=" + java.net.URLEncoder.encode(e.getMessage() != null ? e.getMessage() : "Unknown", "UTF-8"));
         }
     }
 

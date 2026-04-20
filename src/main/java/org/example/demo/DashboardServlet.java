@@ -76,6 +76,31 @@ public class DashboardServlet extends HttpServlet {
                     out.write(json.toString());
                 }
 
+            } else if ("pedometer-stats".equals(action)) {
+                // Get last 7 days of pedometer data
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT logged_date, SUM(steps) AS total_steps, SUM(distance_km) AS total_dist, SUM(calories_burned) AS total_cal " +
+                                "FROM pedometer_logs WHERE email = ? " +
+                                "AND logged_date >= CURRENT_DATE - INTERVAL '6 days' " +
+                                "GROUP BY logged_date ORDER BY logged_date")) {
+                    ps.setString(1, email);
+                    ResultSet rs = ps.executeQuery();
+
+                    StringBuilder json = new StringBuilder("[");
+                    boolean first = true;
+                    while (rs.next()) {
+                        if (!first)
+                            json.append(",");
+                        json.append("{\"date\":\"").append(rs.getDate("logged_date").toString())
+                                .append("\",\"steps\":").append(rs.getInt("total_steps"))
+                                .append(",\"distance_km\":").append(rs.getDouble("total_dist"))
+                                .append(",\"calories\":").append(rs.getInt("total_cal")).append("}");
+                        first = false;
+                    }
+                    json.append("]");
+                    out.write(json.toString());
+                }
+
             } else if ("profile-stats".equals(action)) {
                 // Total all-time meditation minutes
                 PreparedStatement ps1 = conn.prepareStatement(
@@ -178,6 +203,29 @@ public class DashboardServlet extends HttpServlet {
                 ps.setString(2, type);
                 ps.setInt(3, Integer.parseInt(minutes));
                 ps.setDate(4, Date.valueOf(date));
+                ps.executeUpdate();
+                out.write("{\"success\":true}");
+
+            } else if ("log-pedometer".equals(action)) {
+                String stepsStr = request.getParameter("steps");
+                String distStr = request.getParameter("distance_km");
+                String calStr = request.getParameter("calories_burned");
+                String date = request.getParameter("date");
+                if (stepsStr == null || distStr == null || calStr == null) {
+                    out.write("{\"error\":\"Missing steps, distance_km, or calories_burned\"}");
+                    return;
+                }
+                LocalDate logDate = (date != null && !date.isEmpty())
+                        ? LocalDate.parse(date)
+                        : LocalDate.now();
+
+                PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO pedometer_logs (email, steps, distance_km, calories_burned, logged_date) VALUES (?, ?, ?, ?, ?)");
+                ps.setString(1, email);
+                ps.setInt(2, Integer.parseInt(stepsStr));
+                ps.setDouble(3, Double.parseDouble(distStr));
+                ps.setInt(4, Integer.parseInt(calStr));
+                ps.setDate(5, Date.valueOf(logDate));
                 ps.executeUpdate();
                 out.write("{\"success\":true}");
 

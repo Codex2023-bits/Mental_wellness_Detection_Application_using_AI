@@ -71,11 +71,53 @@ public class DBInitializer implements ServletContextListener {
                                         "logged_date DATE NOT NULL)";
                         stmt.execute(createExercise);
 
+                        // 6. Create pedometer logs table
+                        String createPedometer = "CREATE TABLE IF NOT EXISTS pedometer_logs (" +
+                                        "id SERIAL PRIMARY KEY, " +
+                                        "email VARCHAR(255) NOT NULL, " +
+                                        "steps INT NOT NULL, " +
+                                        "distance_km DOUBLE PRECISION NOT NULL, " +
+                                        "calories_burned INT NOT NULL, " +
+                                        "logged_date DATE NOT NULL)";
+                        stmt.execute(createPedometer);
+
+                        // 7. Create user_activity_metrics table (from mobile pedometer pushes)
+                        String createActivityMetrics = "CREATE TABLE IF NOT EXISTS user_activity_metrics (" +
+                                        "id SERIAL PRIMARY KEY, " +
+                                        "user_id VARCHAR(255) NOT NULL, " +
+                                        "step_count INT NOT NULL, " +
+                                        "activity_date DATE NOT NULL, " +
+                                        "sync_source VARCHAR(50) DEFAULT 'mobile', " +
+                                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                                        "UNIQUE(user_id, activity_date))";
+                        stmt.execute(createActivityMetrics);
+
+                        // 8. Create api_tokens table for mobile authentication
+                        String createApiTokens = "CREATE TABLE IF NOT EXISTS api_tokens (" +
+                                        "id SERIAL PRIMARY KEY, " +
+                                        "user_email VARCHAR(255) NOT NULL, " +
+                                        "token VARCHAR(64) NOT NULL UNIQUE, " +
+                                        "expires_at TIMESTAMP NOT NULL, " +
+                                        "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+                        stmt.execute(createApiTokens);
+
+                        // 9. Create user_steps table (simple alias used by PedometerServlet)
+                        String createUserSteps =
+                                "CREATE TABLE IF NOT EXISTS user_steps (" +
+                                "id SERIAL PRIMARY KEY, " +
+                                "email VARCHAR(255) NOT NULL, " +
+                                "step_count INT NOT NULL, " +
+                                "log_date DATE NOT NULL, " +
+                                "UNIQUE(email, log_date))";
+                        stmt.execute(createUserSteps);
                         System.out.println("Database Initialization Successful!");
 
                 } catch (Exception e) {
                         System.err.println("Error during database initialization:");
                         e.printStackTrace();
+                        try {
+                            java.nio.file.Files.writeString(java.nio.file.Paths.get("db_error.txt"), e.toString() + "\n" + java.util.Arrays.toString(e.getStackTrace()));
+                        } catch(Exception ignored){}
                 }
         }
 
